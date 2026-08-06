@@ -1,4 +1,9 @@
 ```
+Copy and edit .env
+cp ~/linode-nginx-stack/env.example ~/linode-nginx-stack/.env
+nano ~/linode-nginx-stack/.env
+```
+```
 mkdir linode-nginx-stack && \
 curl -L -o /tmp/vpn.zip https://raw.githubusercontent.com/AngelGonePro/docker-compose-proxy/refs/heads/main/linode-nginx-stack.zip && \
 python3 - << 'EOF'
@@ -17,6 +22,11 @@ with zipfile.ZipFile(zip_path) as z:
                     f.write(z.read(member))
 EOF
 rm /tmp/vpn.zip
+```
+```
+Copy and edit .env
+cp ~/proxy-nginx/env.example ~/proxy-nginx/.env
+nano ~/proxy-nginx/.env
 ```
 ```
 mkdir proxy-nginx && \
