@@ -1,5 +1,5 @@
 ```
-Copy and edit .env
+# Copy and edit .env
 cp ~/linode-nginx-stack/env.example ~/linode-nginx-stack/.env
 nano ~/linode-nginx-stack/.env
 ```
@@ -24,7 +24,7 @@ EOF
 rm /tmp/vpn.zip
 ```
 ```
-Copy and edit .env
+# Copy and edit .env
 cp ~/proxy-nginx/env.example ~/proxy-nginx/.env
 nano ~/proxy-nginx/.env
 ```
