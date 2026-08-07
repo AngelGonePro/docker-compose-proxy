@@ -1,3 +1,5 @@
+# WARNING: NGINX-UI REQUIRES THE PASSWORD TO BE UNDER 20 CHARACTERS, DO NOT GO OVER IN THE .env!!
+
 ```
 # Copy and edit .env
 cp ~/linode-nginx-stack/.env.example ~/linode-nginx-stack/.env
