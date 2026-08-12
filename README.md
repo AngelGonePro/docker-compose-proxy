@@ -50,3 +50,6 @@ with zipfile.ZipFile(zip_path) as z:
 EOF
 rm /tmp/vpn.zip
 ```
+```
+nano ~/proxy-nginx/frpc/frpc.toml
+```
