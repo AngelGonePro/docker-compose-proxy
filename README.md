@@ -74,6 +74,14 @@ Home:
 ```
 ./deploy-update.sh https://raw.githubusercontent.com/AngelGonePro/docker-compose-proxy/refs/heads/main/proxy-nginx.zip .
 ```
+Then verify your real token survived (should show your actual value, not change_me_shared_secret):
+```
+grep FRP_TOKEN .env
+```
+Once that checks out:
+```
+docker compose up -d --remove-orphans
+```
 
 To update and not use docker pull:
 ```
