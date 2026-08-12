@@ -84,7 +84,7 @@ grep FRP_TOKEN .env
 ```
 Once that checks out:
 ```
-docker compose up -d --remove-orphans
+docker compose up -d --build --remove-orphans
 ```
 
 To update and not use docker pull:
