@@ -1,92 +1,212 @@
 # WARNING: NGINX-UI REQUIRES THE PASSWORD TO BE UNDER 20 CHARACTERS, DO NOT GO OVER IN THE .env!!
 
-```
-# Copy and edit .env
-cp ~/linode-nginx-stack/.env.example ~/linode-nginx-stack/.env
-nano ~/linode-nginx-stack/.env
-```
-```
-mkdir linode-nginx-stack && \
-curl -L -o /tmp/vpn.zip https://raw.githubusercontent.com/AngelGonePro/docker-compose-proxy/refs/heads/main/linode-nginx-stack.zip && \
-python3 - << 'EOF'
-import zipfile, os
-zip_path = "/tmp/vpn.zip"
-extract_to = "linode-nginx-stack"
+# docker-compose-proxy
 
-with zipfile.ZipFile(zip_path) as z:
-    for member in z.namelist():
-        parts = member.split("/", 1)
-        if len(parts) > 1:
-            target = os.path.join(extract_to, parts[1])
-            if not member.endswith("/"):
-                os.makedirs(os.path.dirname(target), exist_ok=True)
-                with open(target, "wb") as f:
-                    f.write(z.read(member))
-EOF
-rm /tmp/vpn.zip
-```
-```
-# Copy and edit .env
-cp ~/proxy-nginx/.env.example ~/proxy-nginx/.env
-nano ~/proxy-nginx/.env
-```
-```
-mkdir proxy-nginx && \
-curl -L -o /tmp/vpn.zip https://raw.githubusercontent.com/AngelGonePro/docker-compose-proxy/refs/heads/main/proxy-nginx.zip && \
-python3 - << 'EOF'
-import zipfile, os
-zip_path = "/tmp/vpn.zip"
-extract_to = "proxy-nginx"
+> **WARNING: nginx-ui requires the admin password to be under 20 characters.
+> Don't go over in `.env`.**
 
-with zipfile.ZipFile(zip_path) as z:
-    for member in z.namelist():
-        parts = member.split("/", 1)
-        if len(parts) > 1:
-            target = os.path.join(extract_to, parts[1])
-            if not member.endswith("/"):
-                os.makedirs(os.path.dirname(target), exist_ok=True)
-                with open(target, "wb") as f:
-                    f.write(z.read(member))
-EOF
-rm /tmp/vpn.zip
-```
-```
-nano ~/proxy-nginx/frpc/frpc.toml
-```
-One liner copy paste for updating stuff without ruining anything:
-All:
-```
-echo "IyEvYmluL3NoCiMgVXNhZ2U6IC4vZGVwbG95LXVwZGF0ZS5zaCA8emlwLXVybD4gPHRhcmdldC1kaXI+CiMKIyBTYWZlbHkgZmV0Y2hlcyBhIGZyZXNoIHppcCBhbmQgYXBwbGllcyBpdCB0byBhbiBFWElTVElORyBkZXBsb3ltZW50LgojIFR3byBjYXRlZ29yaWVzIG9mIGZpbGUgYXJlIG5ldmVyIHRvdWNoZWQgYnkgYSBwbGFpbiBvdmVyd3JpdGU6CiMKIyAxLiBHZW51aW5lIHJ1bnRpbWUgc3RhdGUgKGNlcnRzLCBuZ2lueC11aSdzIGRhdGFiYXNlLCBiYW4gaGlzdG9yeSwKIyAgICBsb2dzKSDigJQgaGFyZC1wcm90ZWN0ZWQgYmVsb3csIGFsd2F5cywgbm8gZXhjZXB0aW9ucywgc2luY2UgdGhlcmUncwojICAgIG5vIG1lYW5pbmdmdWwgInRlbXBsYXRlIiBmb3IgdGhlc2UgdG8gZGlmZiBhZ2FpbnN0LgojCiMgMi4gQW55dGhpbmcgZWxzZSB5b3UndmUgaGFuZC1lZGl0ZWQgc2luY2UgdGhlIGxhc3QgdXBkYXRlIChmcnBjLnRvbWwsCiMgICAgZnJwcy50b21sLCBvciBhbnkgZnV0dXJlIGNvbmZpZyBmaWxlKSDigJQgZGV0ZWN0ZWQgYXV0b21hdGljYWxseSBieQojICAgIGNvbXBhcmluZyBhZ2FpbnN0IGEgYmFzZWxpbmUgc25hcHNob3Qgb2Ygd2hhdCB0aGUgdGVtcGxhdGUgbG9va2VkCiMgICAgbGlrZSBsYXN0IHRpbWUgdGhpcyByYW4sIG5vdCBhIGhhcmRjb2RlZCBsaXN0IG9mIGZpbGVuYW1lcy4gSWYgYQojICAgIGZpbGUgbWF0Y2hlcyBpdHMgYmFzZWxpbmUsIHlvdSBoYXZlbid0IHRvdWNoZWQgaXQsIHNvIGl0J3Mgc2FmZSB0bwojICAgIHVwZGF0ZSBub3JtYWxseS4gSWYgaXQgZGlmZmVycywgeW91IGVkaXRlZCBpdCwgc28gaXQncyBsZWZ0IGFsb25lCiMgICAgYW5kIHJlcG9ydGVkIGluc3RlYWQgb2Ygc2lsZW50bHkgb3ZlcndyaXR0ZW4uIEZpcnN0IHJ1biBldmVyIGhhcwojICAgIG5vIGJhc2VsaW5lIHlldCwgc28gbm90aGluZyBwcmUtZXhpc3RpbmcgaXMgdG91Y2hlZCDigJQgb25seSBmaWxlcwojICAgIHRoYXQgZG9uJ3QgYWxyZWFkeSBleGlzdCBnZXQgY3JlYXRlZC4Kc2V0IC1ldQoKZm9yIGNtZCBpbiBjdXJsIHB5dGhvbjM7IGRvCiAgaWYgISBjb21tYW5kIC12ICIkY21kIiA+L2Rldi9udWxsIDI+JjE7IHRoZW4KICAgIGVjaG8gIk1pc3NpbmcgZGVwZW5kZW5jeTogJGNtZCIgPiYyCiAgICBlY2hvICJJbnN0YWxsIGl0IGZpcnN0OiBzdWRvIGFwdCB1cGRhdGUgJiYgc3VkbyBhcHQgaW5zdGFsbCAteSAkY21kIiA+JjIKICAgIGV4aXQgMQogIGZpCmRvbmUKClpJUF9VUkw9IiR7MTo/VXNhZ2U6ICQwIDx6aXAtdXJsPiA8dGFyZ2V0LWRpcj59IgpUQVJHRVRfRElSPSIkezI6P1VzYWdlOiAkMCA8emlwLXVybD4gPHRhcmdldC1kaXI+fSIKCmlmIFsgIiQoYmFzZW5hbWUgIiRQV0QiKSIgPSAiJFRBUkdFVF9ESVIiIF0gJiYgeyBbIC1mICJkb2NrZXItY29tcG9zZS55bWwiIF0gfHwgWyAtZiAiLmVudiIgXTsgfTsgdGhlbgogIGVjaG8gIllvdSdyZSBhbHJlYWR5IGluc2lkZSBhIGRpcmVjdG9yeSBuYW1lZCAnJFRBUkdFVF9ESVInIHdpdGggYW4gZXhpc3RpbmcgZGVwbG95bWVudCBpbiBpdCDigJQgdXNpbmcgJy4nIGluc3RlYWQgb2YgY3JlYXRpbmcgYSBuZXN0ZWQgJyRUQVJHRVRfRElSLyRUQVJHRVRfRElSLycuIiA+JjIKICBUQVJHRVRfRElSPSIuIgpmaQoKIyBHZW51aW5lIHJ1bnRpbWUgc3RhdGUgb25seSDigJQgbmV2ZXIgaGFzIGEgInRlbXBsYXRlIiB0byBkaWZmIGFnYWluc3QsCiMgc28gaXQncyBleGNsdWRlZCBmcm9tIHRoZSBiYXNlbGluZSBtZWNoYW5pc20gZW50aXJlbHkgcmF0aGVyIHRoYW4KIyByZWx5aW5nIG9uIHRoYXQgY29tcGFyaXNvbiB0byBwcm90ZWN0IGl0LiBUaGlzIHNjcmlwdCBpdHNlbGYgaXMgaGVyZQojIHRvbywgYnV0IGZvciBhIGRpZmZlcmVudCByZWFzb246IGl0IG11c3QgbmV2ZXIgbW9kaWZ5IGl0c2VsZiB3aGlsZQojIGl0J3MgdGhlIG9uZSBjdXJyZW50bHkgcnVubmluZywgcmVnYXJkbGVzcyBvZiB3aGV0aGVyIGl0J3MgImNoYW5nZWQKIyBzaW5jZSBiYXNlbGluZSIg4oCUIGEgc2VsZi1vdmVyd3JpdGUgbWlkLWV4ZWN1dGlvbiBjb3JydXB0cyB0aGUgcnVubmluZwojIHByb2Nlc3MgKGNvbmZpcm1lZCB0aGUgaGFyZCB3YXkpLgpIQVJEX1BST1RFQ1RFRF9QQVRIUz0iCm5naW54LWNvbmYKbmdpbngtdWktZGF0YQpjZXJ0Ym90L2NlcnRzCmNlcnRib3QvbG9ncwpjZXJ0Ym90L3d3dwpmYWlsMmJhbi9kYXRhCmZhaWwyYmFuL2phaWwuZC8wMC1pZ25vcmVpcC5sb2NhbApuZ2lueC1sb2dzCmxvZ3JvdGF0ZS9zdGF0ZQpkZXBsb3ktdXBkYXRlLnNoCi5lbnYKLmVudi5sYXN0LWdvb2QKdXBkYXRlLWZhaWx1cmVzLmxvZwoiCkJBU0VMSU5FX0RJUj0iJFRBUkdFVF9ESVIvLmRlcGxveS1iYXNlbGluZSIKCmlzX2hhcmRfcHJvdGVjdGVkKCkgewogIHBhdGg9IiQxIgogIGZvciBwIGluICRIQVJEX1BST1RFQ1RFRF9QQVRIUzsgZG8KICAgIGNhc2UgIiRwYXRoIiBpbgogICAgICAiJHAifCIkcCIvKikgcmV0dXJuIDAgOzsKICAgIGVzYWMKICBkb25lCiAgcmV0dXJuIDEKfQoKVE1QX1pJUD0kKG1rdGVtcCkKVE1QX0VYVFJBQ1Q9JChta3RlbXAgLWQpCnRyYXAgJ3JtIC1mICIkVE1QX1pJUCI7IHJtIC1yZiAiJFRNUF9FWFRSQUNUIicgRVhJVAoKZWNobyAiPT0+IERvd25sb2FkaW5nICRaSVBfVVJMIgpjdXJsIC1mc1NMIC1vICIkVE1QX1pJUCIgIiRaSVBfVVJMIgoKZWNobyAiPT0+IEV4dHJhY3RpbmcgKHN0cmlwcGluZyB0aGUgdG9wLWxldmVsIGZvbGRlciwgbWF0Y2hpbmcgeW91ciBleGlzdGluZyBjb252ZW50aW9uKSIKcHl0aG9uMyAtICIkVE1QX1pJUCIgIiRUTVBfRVhUUkFDVCIgPDwgJ1BZRU9GJwppbXBvcnQgemlwZmlsZSwgb3MsIHN5cwp6aXBfcGF0aCwgZXh0cmFjdF90byA9IHN5cy5hcmd2WzFdLCBzeXMuYXJndlsyXQp3aXRoIHppcGZpbGUuWmlwRmlsZSh6aXBfcGF0aCkgYXMgejoKICAgIGZvciBtZW1iZXIgaW4gei5uYW1lbGlzdCgpOgogICAgICAgIHBhcnRzID0gbWVtYmVyLnNwbGl0KCIvIiwgMSkKICAgICAgICBpZiBsZW4ocGFydHMpID4gMSBhbmQgcGFydHNbMV06CiAgICAgICAgICAgIHRhcmdldCA9IG9zLnBhdGguam9pbihleHRyYWN0X3RvLCBwYXJ0c1sxXSkKICAgICAgICAgICAgaWYgbm90IG1lbWJlci5lbmRzd2l0aCgiLyIpOgogICAgICAgICAgICAgICAgb3MubWFrZWRpcnMob3MucGF0aC5kaXJuYW1lKHRhcmdldCksIGV4aXN0X29rPVRydWUpCiAgICAgICAgICAgICAgICB3aXRoIG9wZW4odGFyZ2V0LCAid2IiKSBhcyBmOgogICAgICAgICAgICAgICAgICAgIGYud3JpdGUoei5yZWFkKG1lbWJlcikpClBZRU9GCgpta2RpciAtcCAiJFRBUkdFVF9ESVIiICIkQkFTRUxJTkVfRElSIgoKZWNobyAiPT0+IEFwcGx5aW5nIHVwZGF0ZXMiCk1PRElGSUVEX0ZJTEVTPSIiCk5FV19GSUxFUz0iIgooIGNkICIkVE1QX0VYVFJBQ1QiICYmIGZpbmQgLiAtdHlwZSBmICkgfCBzZWQgJ3MjXlwuLyMjJyB8IHdoaWxlIElGUz0gcmVhZCAtciByZWxwYXRoOyBkbwogIGlmIGlzX2hhcmRfcHJvdGVjdGVkICIkcmVscGF0aCI7IHRoZW4KICAgIGNvbnRpbnVlCiAgZmkKCiAgdGFyZ2V0X2ZpbGU9IiRUQVJHRVRfRElSLyRyZWxwYXRoIgogIGJhc2VsaW5lX2ZpbGU9IiRCQVNFTElORV9ESVIvJHJlbHBhdGgiCiAgbmV3X2ZpbGU9IiRUTVBfRVhUUkFDVC8kcmVscGF0aCIKCiAgaWYgWyAhIC1lICIkdGFyZ2V0X2ZpbGUiIF07IHRoZW4KICAgICMgRG9lc24ndCBleGlzdCB5ZXQg4oCUIGFsd2F5cyBzYWZlLCBub3RoaW5nIHRvIHByb3RlY3QuCiAgICBta2RpciAtcCAiJFRBUkdFVF9ESVIvJChkaXJuYW1lICIkcmVscGF0aCIpIgogICAgY3AgIiRuZXdfZmlsZSIgIiR0YXJnZXRfZmlsZSIKICAgIGVjaG8gIiRyZWxwYXRoIiA+PiAvdG1wL2RlcGxveV9uZXdfZmlsZXMuJCQKICBlbGlmIFsgLWYgIiRiYXNlbGluZV9maWxlIiBdICYmIGNtcCAtcyAiJHRhcmdldF9maWxlIiAiJGJhc2VsaW5lX2ZpbGUiOyB0aGVuCiAgICAjIE1hdGNoZXMgd2hhdCB3ZSBsYXN0IGFwcGxpZWQg4oCUIHlvdSBoYXZlbid0IHRvdWNoZWQgaXQgc2luY2UsCiAgICAjIHNhZmUgdG8gdXBkYXRlIG5vcm1hbGx5LgogICAgbWtkaXIgLXAgIiRUQVJHRVRfRElSLyQoZGlybmFtZSAiJHJlbHBhdGgiKSIKICAgIGNwICIkbmV3X2ZpbGUiICIkdGFyZ2V0X2ZpbGUiCiAgZWxpZiBbIC1mICIkYmFzZWxpbmVfZmlsZSIgXTsgdGhlbgogICAgIyBEaWZmZXJzIGZyb20gd2hhdCB3ZSBsYXN0IGFwcGxpZWQg4oCUIHlvdSBlZGl0ZWQgaXQgc2luY2UuIExlYXZlCiAgICAjIGl0IGFsb25lLiBCYXNlbGluZSBzdGlsbCBhZHZhbmNlcyBiZWxvdyB0byB0aGUgY3VycmVudCB0ZW1wbGF0ZSwKICAgICMgc28gdGhlIGRpZmYgc2hvd24gaXMgYWdhaW5zdCB3aGF0IHlvdSdkIGFjdHVhbGx5IGdldCBpZiB5b3UgZGlkCiAgICAjIHN5bmMsIGFuZCBhIGdlbnVpbmUgcmV2ZXJ0LXRvLXRlbXBsYXRlIG9uIHlvdXIgZW5kIGlzIGNvcnJlY3RseQogICAgIyByZWNvZ25pemVkIGFzICJzYWZlIGFnYWluIiBvbiB0aGUgbmV4dCBydW4uCiAgICBlY2hvICIkcmVscGF0aCIgPj4gL3RtcC9kZXBsb3lfZWRpdGVkX2ZpbGVzLiQkCiAgZWxzZQogICAgIyBObyBiYXNlbGluZSB5ZXQgZm9yIGEgcHJlLWV4aXN0aW5nIGZpbGUg4oCUIHRoaXMgaXMgdGhlIHZlcnkgZmlyc3QKICAgICMgdGltZSB0aGlzIG1lY2hhbmlzbSBoYXMgY29tcGFyZWQgaXQuIFdlIGRvbid0IGtub3cgeWV0IHdoZXRoZXIKICAgICMgaXQncyBoYW5kLWVkaXRlZCBvciBqdXN0IGhhcHBlbnMgdG8gYWxyZWFkeSBtYXRjaCB3aGF0J3MgYmVpbmcKICAgICMgc2hpcHBlZCwgc28gdGhpcyBvbmUgcnVuIGxlYXZlcyBpdCBhbG9uZSByYXRoZXIgdGhhbiBndWVzcyB3cm9uZwogICAgIyAodGhpcyBpcyB3aGF0IHByb3RlY3RzIGEgcmVhbCBoYW5kLWVkaXRlZCBmcnBjLnRvbWwgdGhlIGZpcnN0CiAgICAjIHRpbWUgdGhpcyBydW5zIG9uIGFuIGV4aXN0aW5nIGRlcGxveW1lbnQpLiBCYXNlbGluZSBnZXRzCiAgICAjIGVzdGFibGlzaGVkIGJlbG93IGVpdGhlciB3YXksIHNvIGZyb20gdGhlIE5FWFQgcnVuIG9ud2FyZCB0aGlzCiAgICAjIGZpbGUgaXMgdHJhY2tlZCBub3JtYWxseTogaWYgaXQgYWxyZWFkeSBtYXRjaGVkLCBpdCBzdGFydHMKICAgICMgdXBkYXRpbmcgbm9ybWFsbHkgZnJvbSBoZXJlIG9uOyBpZiBpdCBkaWRuJ3QsIGl0J3Mgbm93IGNvcnJlY3RseQogICAgIyBmbGFnZ2VkIGFzIGVkaXRlZCBnb2luZyBmb3J3YXJkIHRvby4KICAgIGVjaG8gIiRyZWxwYXRoIiA+PiAvdG1wL2RlcGxveV91bnRyYWNrZWRfZmlsZXMuJCQKICBmaQoKICBta2RpciAtcCAiJEJBU0VMSU5FX0RJUi8kKGRpcm5hbWUgIiRyZWxwYXRoIikiCiAgY3AgIiRuZXdfZmlsZSIgIiRiYXNlbGluZV9maWxlIgpkb25lCgppZiBbIC1mIC90bXAvZGVwbG95X25ld19maWxlcy4kJCBdOyB0aGVuCiAgZWNobyAiICAgIE5ldyBmaWxlcyBhZGRlZDoiCiAgc2VkICdzL14vICAgICAgLycgL3RtcC9kZXBsb3lfbmV3X2ZpbGVzLiQkCiAgcm0gLWYgL3RtcC9kZXBsb3lfbmV3X2ZpbGVzLiQkCmZpCgppZiBbIC1mIC90bXAvZGVwbG95X2VkaXRlZF9maWxlcy4kJCBdOyB0aGVuCiAgZWNobyAiICAgIEhhbmQtZWRpdGVkIGJ5IHlvdSBzaW5jZSB0aGUgbGFzdCB1cGRhdGUg4oCUIGxlZnQgdW50b3VjaGVkLiBEaWZmIGFnYWluc3Qgd2hhdCB3YXMiCiAgZWNobyAiICAgIGxhc3QgYWN0dWFsbHkgYXBwbGllZCB0byBzZWUgZXhhY3RseSB3aGF0IHlvdSBjaGFuZ2VkOiIKICB3aGlsZSBJRlM9IHJlYWQgLXIgZjsgZG8KICAgIGVjaG8gIiAgICAgIGRpZmYgJFRBUkdFVF9ESVIvJGYgJEJBU0VMSU5FX0RJUi8kZiIKICBkb25lIDwgL3RtcC9kZXBsb3lfZWRpdGVkX2ZpbGVzLiQkCiAgcm0gLWYgL3RtcC9kZXBsb3lfZWRpdGVkX2ZpbGVzLiQkCmZpCgppZiBbIC1mIC90bXAvZGVwbG95X3VudHJhY2tlZF9maWxlcy4kJCBdOyB0aGVuCiAgZWNobyAiICAgIEZpcnN0IHRpbWUgY29tcGFyaW5nIHRoZXNlIGFnYWluc3QgYSB0ZW1wbGF0ZSDigJQgbGVmdCBhbG9uZSB0aGlzIG9uZSB0aW1lIGluIGNhc2UiCiAgZWNobyAiICAgIHRoZXkncmUgaGFuZC1lZGl0ZWQ7IHRyYWNrZWQgbm9ybWFsbHkgZnJvbSB0aGUgbmV4dCB1cGRhdGUgb253YXJkOiIKICBzZWQgJ3MvXi8gICAgICAvJyAvdG1wL2RlcGxveV91bnRyYWNrZWRfZmlsZXMuJCQKICBybSAtZiAvdG1wL2RlcGxveV91bnRyYWNrZWRfZmlsZXMuJCQKZmkKCmVjaG8gIj09PiBDaGVja2luZyBmb3IgZmlsZXMvZm9sZGVycyB0aGlzIHVwZGF0ZSByZW1vdmVkIChub3RoaW5nIGF1dG8tZGVsZXRlZCDigJQgcmVwb3J0ZWQgb25seSkiCmlmIFsgLWQgIiRUQVJHRVRfRElSIiBdOyB0aGVuCiAgT1JQSEFOX0xJU1Q9IiIKICBmb3IgZW50cnkgaW4gIiRUQVJHRVRfRElSIi8qICIkVEFSR0VUX0RJUiIvLlshLl0qOyBkbwogICAgWyAtZSAiJGVudHJ5IiBdIHx8IGNvbnRpbnVlCiAgICBuYW1lPSQoYmFzZW5hbWUgIiRlbnRyeSIpCiAgICBjYXNlICIkbmFtZSIgaW4KICAgICAgZGVwbG95LXVwZGF0ZS5zaHwuZW52fC5lbnYubGFzdC1nb29kfHVwZGF0ZS1mYWlsdXJlcy5sb2d8LmRlcGxveS1iYXNlbGluZSkgY29udGludWUgOzsKICAgIGVzYWMKICAgIGlmIGlzX2hhcmRfcHJvdGVjdGVkICIkbmFtZSI7IHRoZW4KICAgICAgY29udGludWUKICAgIGZpCiAgICBpZiBbICEgLWUgIiRUTVBfRVhUUkFDVC8kbmFtZSIgXTsgdGhlbgogICAgICBPUlBIQU5fTElTVD0iJHtPUlBIQU5fTElTVH0ke25hbWV9CiIKICAgIGZpCiAgZG9uZQogIGlmIFsgLW4gIiRPUlBIQU5fTElTVCIgXTsgdGhlbgogICAgZWNobyAiICAgIE5vIGxvbmdlciBwYXJ0IG9mIHRoZSBwcm9qZWN0IOKAlCBzYWZlIHRvIHJlbW92ZSwgbm90aGluZyBkZWxldGVkIGF1dG9tYXRpY2FsbHk6IgogICAgcHJpbnRmICclcycgIiRPUlBIQU5fTElTVCIgfCBzZWQgJ3MvXi8gICAgICAvJwogICAgZWNobyAiICAgIGUuZy46IgogICAgcHJpbnRmICclcycgIiRPUlBIQU5fTElTVCIgfCBzZWQgInMjXiMgICAgICBybSAtcmYgJFRBUkdFVF9ESVIvIyIKICBlbHNlCiAgICBlY2hvICIgICAgTm90aGluZyBvcnBoYW5lZC4iCiAgZmkKZmkKCmVjaG8gIj09PiBNZXJnaW5nIC5lbnYiCmlmIFsgLWYgIiRUQVJHRVRfRElSLy5lbnYiIF0gJiYgWyAtZiAiJFRNUF9FWFRSQUNULy5lbnYiIF07IHRoZW4KICBORVdfS0VZUz0iIgogIHdoaWxlIElGUz0gcmVhZCAtciBsaW5lOyBkbwogICAgY2FzZSAiJGxpbmUiIGluCiAgICAgIFwjKnwiIikgY29udGludWUgOzsKICAgIGVzYWMKICAgIGtleT0kKGVjaG8gIiRsaW5lIiB8IGN1dCAtZD0gLWYxKQogICAgaWYgISBncmVwIC1xICJeJHtrZXl9PSIgIiRUQVJHRVRfRElSLy5lbnYiIDI+L2Rldi9udWxsOyB0aGVuCiAgICAgIE5FV19LRVlTPSIke05FV19LRVlTfSR7bGluZX0KIgogICAgZmkKICBkb25lIDwgIiRUTVBfRVhUUkFDVC8uZW52IgoKICBpZiBbIC1uICIkTkVXX0tFWVMiIF07IHRoZW4KICAgIHsKICAgICAgZWNobyAiIgogICAgICBlY2hvICIjIC0tLSBOZXcgaW4gdGhpcyB1cGRhdGUgKCQoZGF0ZSAtdSArJyVZLSVtLSVkVCVIOiVNOiVTWicpKSDigJQgcmV2aWV3IHRoZXNlIC0tLSIKICAgICAgcHJpbnRmICclcycgIiRORVdfS0VZUyIKICAgIH0gPj4gIiRUQVJHRVRfRElSLy5lbnYiCiAgICBlY2hvICIgICAgTmV3IC5lbnYga2V5cyBhZGRlZCAoZGVmYXVsdHMgZnJvbSB0aGUgdGVtcGxhdGUpIOKAlCByZXZpZXcgdGhlIGJvdHRvbSBvZiAkVEFSR0VUX0RJUi8uZW52OiIKICAgIHByaW50ZiAnJXMnICIkTkVXX0tFWVMiIHwgZ3JlcCAtdiAnXiMnIHwgZ3JlcCAtdiAnXiQnIHwgc2VkICdzL14vICAgICAgLycKICBlbHNlCiAgICBlY2hvICIgICAgTm8gbmV3IC5lbnYga2V5cyDigJQgbm90aGluZyB0byBhZGQuIgogIGZpCiAgZWNobyAiICAgIEFsbCB5b3VyIGV4aXN0aW5nIHZhbHVlcyB3ZXJlIGxlZnQgZXhhY3RseSBhcyB0aGV5IHdlcmUuIgoKICBPQlNPTEVURV9LRVlTPSIiCiAgd2hpbGUgSUZTPSByZWFkIC1yIGxpbmU7IGRvCiAgICBjYXNlICIkbGluZSIgaW4KICAgICAgXCMqfCIiKSBjb250aW51ZSA7OwogICAgZXNhYwogICAga2V5PSQoZWNobyAiJGxpbmUiIHwgY3V0IC1kPSAtZjEpCiAgICBpZiAhIGdyZXAgLXEgIl4ke2tleX09IiAiJFRNUF9FWFRSQUNULy5lbnYiIDI+L2Rldi9udWxsOyB0aGVuCiAgICAgIE9CU09MRVRFX0tFWVM9IiR7T0JTT0xFVEVfS0VZU30ke2tleX0KIgogICAgZmkKICBkb25lIDwgIiRUQVJHRVRfRElSLy5lbnYiCiAgaWYgWyAtbiAiJE9CU09MRVRFX0tFWVMiIF07IHRoZW4KICAgIGVjaG8gIiAgICBUaGVzZSAuZW52IGtleXMgYXJlIG5vIGxvbmdlciB1c2VkIGJ5IHRoZSBjdXJyZW50IHRlbXBsYXRlIOKAlCBsZWZ0IGluIHBsYWNlIChub3QiCiAgICBlY2hvICIgICAgZGVsZXRlZCBhdXRvbWF0aWNhbGx5KSwgc2FmZSB0byByZW1vdmUgb25jZSB5b3UndmUgY29uZmlybWVkIHlvdSBkb24ndCBuZWVkIHRoZW06IgogICAgcHJpbnRmICclcycgIiRPQlNPTEVURV9LRVlTIiB8IHNlZCAncy9eLyAgICAgIC8nCiAgZmkKZWxpZiBbIC1mICIkVE1QX0VYVFJBQ1QvLmVudiIgXTsgdGhlbgogIGNwICIkVE1QX0VYVFJBQ1QvLmVudiIgIiRUQVJHRVRfRElSLy5lbnYiCiAgZWNobyAiICAgIE5vIGV4aXN0aW5nIC5lbnYgZm91bmQg4oCUIGNvcGllZCB0aGUgdGVtcGxhdGUgYXMgYSBzdGFydGluZyBwb2ludC4gRmlsbCBpbiB5b3VyIHJlYWwgdmFsdWVzIGJlZm9yZSBkZXBsb3lpbmcuIgpmaQoKZWNobyAiIgplY2hvICI9PT4gRG9uZS4gUmV2aWV3IGFueSBoYW5kLWVkaXRlZCBmaWxlcyBhbmQgbmV3IC5lbnYga2V5cywgdGhlbiBydW46IgplY2hvICIgICAgY2QgJFRBUkdFVF9ESVIgJiYgZG9ja2VyIGNvbXBvc2UgdXAgLWQgLS1idWlsZCAtLXJlbW92ZS1vcnBoYW5zIgo=" | base64 -d > deploy-update.sh && chmod +x deploy-update.sh && wc -l deploy-update.sh
+Two nginx-ui reverse-proxy stacks joined by an FRP tunnel:
+
+| Zip | Runs on | What it does |
+|---|---|---|
+| `linode-nginx-stack.zip` | the Linode (public edge) | nginx-ui with a wildcard cert, frps, fail2ban, connection rate limiting for Minecraft and other tunneled ports, and an inbound blocklist for the whole host |
+| `proxy-nginx.zip` | debian-proxy at home (`10.0.0.100`) | nginx-ui with its own copy of the wildcard cert, frpc (the tunnel to the Linode), and site configs for home services |
+
+Each zip has its own detailed README inside (`linode-nginx-stack/README.md`,
+`proxy-nginx/README.md`).
+
+## Install / update: one command each
+
+The same command installs a fresh copy and updates an existing one. It
+downloads the zip from GitHub and applies it without touching your `.env`
+values, files you've hand-edited or runtime state. Then it pulls and builds
+the versions pinned in `.env`, recreates the containers and checks they all
+came back up.
+
+**Linode:**
+```bash
+curl -fsSL --retry 3 -o /tmp/linode-nginx-stack.zip https://raw.githubusercontent.com/AngelGonePro/docker-compose-proxy/refs/heads/main/linode-nginx-stack.zip && python3 -c "import zipfile;open('/tmp/linode-nginx-stack-deploy.sh','wb').write(zipfile.ZipFile('/tmp/linode-nginx-stack.zip').read('linode-nginx-stack/deploy-update.sh'))" && sh /tmp/linode-nginx-stack-deploy.sh file:///tmp/linode-nginx-stack.zip ~/linode-nginx-stack
 ```
 
-Should print 242 deploy-update.sh
-
-<br>
-
-Cloud:
-```
-./deploy-update.sh https://raw.githubusercontent.com/AngelGonePro/docker-compose-proxy/refs/heads/main/linode-nginx-stack.zip .
-```
-Home:
-```
-./deploy-update.sh https://raw.githubusercontent.com/AngelGonePro/docker-compose-proxy/refs/heads/main/proxy-nginx.zip .
-```
-Then verify your real token survived (should show your actual value, not change_me_shared_secret):
-```
-grep FRP_TOKEN .env
-```
-Once that checks out:
-```
-docker compose up -d --build --remove-orphans
+**Home (debian-proxy):**
+```bash
+curl -fsSL --retry 3 -o /tmp/proxy-nginx.zip https://raw.githubusercontent.com/AngelGonePro/docker-compose-proxy/refs/heads/main/proxy-nginx.zip && python3 -c "import zipfile;open('/tmp/proxy-nginx-deploy.sh','wb').write(zipfile.ZipFile('/tmp/proxy-nginx.zip').read('proxy-nginx/deploy-update.sh'))" && sh /tmp/proxy-nginx-deploy.sh file:///tmp/proxy-nginx.zip ~/proxy-nginx
 ```
 
-To update and not use docker pull:
+After uploading a new zip to GitHub, wait 5 minutes before running the
+command: GitHub serves the previous copy for up to 5 minutes.
+
+## Fresh install, step by step
+
+Run everything as root (`sudo -s`). Set up the Linode first, then home.
+
+### 1. Prerequisites (both machines)
+
+```bash
+apt update && apt install -y curl python3 openssl
+command -v docker || curl -fsSL https://get.docker.com | sh
+df -h /var /home
 ```
-cd ~/linode-nginx-stack
+
+If `/var` is its own small partition (a few GB), move Docker's storage off it
+first; see [Disk full on /var](#disk-full-on-var-no-space-left-on-device).
+
+### 2. The Linode
+
+1. Download the files. The first run puts them in `~/linode-nginx-stack` and
+   stops:
+   ```bash
+   curl -fsSL --retry 3 -o /tmp/linode-nginx-stack.zip https://raw.githubusercontent.com/AngelGonePro/docker-compose-proxy/refs/heads/main/linode-nginx-stack.zip && python3 -c "import zipfile;open('/tmp/linode-nginx-stack-deploy.sh','wb').write(zipfile.ZipFile('/tmp/linode-nginx-stack.zip').read('linode-nginx-stack/deploy-update.sh'))" && sh /tmp/linode-nginx-stack-deploy.sh file:///tmp/linode-nginx-stack.zip ~/linode-nginx-stack
+   ```
+2. Fill in the settings:
+   ```bash
+   nano ~/linode-nginx-stack/.env
+   ```
+   | Key | What to put |
+   |---|---|
+   | `ROOT_DOMAIN` | `cosmoscraft.net` |
+   | `CF_API_TOKEN` | Cloudflare API token with **Zone:DNS:Edit** for that zone only |
+   | `LE_EMAIL` | your email, for certificate notices |
+   | `NGINX_UI_ADMIN_EMAIL`, `NGINX_UI_ADMIN_USER`, `NGINX_UI_ADMIN_PASSWORD` | the nginx-ui admin account (password **under 20 characters**) |
+   | `FRP_TOKEN` | a long random secret: `openssl rand -hex 24`. Home uses the same value. |
+   | `FRP_DASHBOARD_PASSWORD` | a password for the frps dashboard |
+   | `COMPOSE_PROFILES` | `firewall` (turns on fail2ban and the blocklist) |
+   | `FAIL2BAN_WHITELIST_IPS` | your own static IPs, so you can't lock yourself out |
+   | `RATE_LIMIT_EXCLUDE_PORTS` | public ports that should never be rate-limited |
+3. Start it: run the command from step 1 again. It ends with
+   `Update complete and verified`.
+4. Check:
+   ```bash
+   cd ~/linode-nginx-stack && docker compose ps
+   docker logs bootstrap --tail 5
+   docker logs blocklist --tail 3
+   ```
+   `bootstrap` should say the cert was imported, and `blocklist` should say
+   `active — dropping new connections from ... networks`.
+5. In the Linode Cloud Firewall, allow inbound TCP 80, 443 and
+   `FRP_BIND_PORT` (7000), plus the public game ports you tunnel.
+
+### 3. Home (debian-proxy)
+
+1. Download the files (first run stops):
+   ```bash
+   curl -fsSL --retry 3 -o /tmp/proxy-nginx.zip https://raw.githubusercontent.com/AngelGonePro/docker-compose-proxy/refs/heads/main/proxy-nginx.zip && python3 -c "import zipfile;open('/tmp/proxy-nginx-deploy.sh','wb').write(zipfile.ZipFile('/tmp/proxy-nginx.zip').read('proxy-nginx/deploy-update.sh'))" && sh /tmp/proxy-nginx-deploy.sh file:///tmp/proxy-nginx.zip ~/proxy-nginx
+   ```
+2. Fill in the settings:
+   ```bash
+   nano ~/proxy-nginx/.env
+   ```
+   | Key | What to put |
+   |---|---|
+   | `ROOT_DOMAIN`, `CF_API_TOKEN`, `LE_EMAIL` | same as the Linode |
+   | `NGINX_UI_ADMIN_*` | this nginx-ui's admin account (password **under 20 characters**) |
+   | `FRP_SERVER_ADDR` | `45.79.25.46` (the Linode) |
+   | `FRP_SERVER_PORT`, `FRP_TOKEN`, `TUNNEL_LOCAL_PORT` | exactly the Linode's `FRP_BIND_PORT`, `FRP_TOKEN`, `TUNNEL_LOCAL_PORT` |
+3. Add your tunnels (Minecraft and so on):
+   ```bash
+   nano ~/proxy-nginx/frpc/frpc.toml
+   ```
+   Proxy names must end in the public port, e.g.
+   `minecraft-java-25565-realip`. The Linode's rate limiter finds them by
+   that name. Examples are in the file.
+4. Start it: run the command from step 1 again.
+5. Check the tunnel:
+   ```bash
+   docker logs frpc 2>&1 | grep -i "login to server success" | tail -1
+   ```
+
+### 4. Site configs (in the nginx-ui panels)
+
+Templates are in each stack's `nginx-sites/` folder. In each panel: **Sites →
+Add Site**, paste the file, change the backend IP/port, save and enable.
+
+| Panel | Add |
+|---|---|
+| Home, `http://10.0.0.100:9001` | `home-tunnel-relay.conf` (traffic from the Linode), `home-direct-lan-vpn.conf` (LAN/VPN), `threatmap.conf` (optional, the wg-vpn-gateway threat map), the Pterodactyl ones if needed |
+| Linode | `linode-tunneled-site.conf` for each domain whose backend is at home, the Pterodactyl ones if needed |
+
+For a site served through Cloudflare Tunnel instead, add a public hostname in
+Cloudflare Zero Trust pointing at `http://10.0.0.100:80`.
+
+### 5. Threat map: send the Linode's blocks home (optional)
+
+Needs wg-vpn-gateway on debian-proxy with the split tunnel and the
+`dashboard` profile (see the wireguard-upstream-vpn README, steps 2 and 5).
+
+1. **On the Linode**, turn on the read-only stats and copy the token it
+   prints:
+   ```bash
+   cd ~/linode-nginx-stack && TOK=$(openssl rand -hex 24) && sed -i "s|^BLOCKLIST_STATS_LISTEN=.*|BLOCKLIST_STATS_LISTEN=192.168.209.180:9180|; s|^BLOCKLIST_STATS_TOKEN=.*|BLOCKLIST_STATS_TOKEN=$TOK|" .env && docker compose up -d blocklist && sleep 15 && docker logs blocklist --tail 2; echo "TOKEN: $TOK"
+   ```
+2. **On debian-proxy**, with that token in place of `PASTE_TOKEN`:
+   ```bash
+   cd ~/wg-vpn-gateway && TOK=PASTE_TOKEN && sed -i "s|^DASHBOARD_UPSTREAM_URL=.*|DASHBOARD_UPSTREAM_URL=http://192.168.209.180:9180/stats|; s|^DASHBOARD_UPSTREAM_TOKEN=.*|DASHBOARD_UPSTREAM_TOKEN=$TOK|" .env && docker compose up -d
+   ```
+3. A minute later, `docker logs wg-vpn-gateway-dashboard-collector 2>&1 | grep -i upstream | tail -1`
+   should say `upstream: ok`.
+
+Use `192.168.209.180`, not the WireGuard address `10.13.13.1`: StratumVPN
+sends every reply from `10.13.13.0/24` out through Windscribe, so home would
+never get an answer.
+
+## Updating
+
+Run the same install command. What it reports:
+
+- **"Hand-edited by you ... left untouched"**: the file differs from what was
+  last installed, so your version is kept. The `diff` line it prints shows
+  what the new release would change.
+- **"New .env keys added"**: new settings, added at the bottom of `.env` with
+  their defaults.
+- **"These .env keys are no longer used"**: nothing in the current release
+  reads them. They're left in place. Delete them only once you're sure your
+  own edited files don't use them either.
+- **"Update complete and verified"**: done. The current `.env` is saved as
+  `.env.last-good`.
+- **"[FAIL]"**: details are in `update-failures.log` in the stack folder. The
+  version pins (`*_VERSION`) go back to the last working ones and the stack
+  is redeployed. Every other `.env` setting stays as you set it.
+
+To redeploy the pinned versions without downloading a new release:
+```bash
+cd ~/linode-nginx-stack && ./update.sh
+cd ~/proxy-nginx && ./update.sh
 ```
+
+## Troubleshooting
+
+### Disk full on /var ("no space left on device")
+
+Debian can put `/var` on its own small partition, and Docker keeps everything
+under `/var/lib/docker` and `/var/lib/containerd`. Check with `df -h /var /home`.
+To move Docker to `/home` (all containers stop for a few minutes, then start
+again):
+
+```bash
+systemctl stop docker.socket docker containerd && \
+mkdir -p /home/docker-data/docker /home/docker-data/containerd && \
+cp -a /var/lib/docker/. /home/docker-data/docker/ && \
+cp -a /var/lib/containerd/. /home/docker-data/containerd/ && \
+mv /var/lib/docker /var/lib/docker.old && mv /var/lib/containerd /var/lib/containerd.old && \
+mkdir /var/lib/docker /var/lib/containerd && \
+echo '/home/docker-data/docker /var/lib/docker none bind 0 0' >> /etc/fstab && \
+echo '/home/docker-data/containerd /var/lib/containerd none bind 0 0' >> /etc/fstab && \
+systemctl daemon-reload && mount /var/lib/docker && mount /var/lib/containerd && \
+systemctl start containerd docker && sleep 15 && docker ps --format '{{.Names}}: {{.Status}}'
 ```
-cd ~/proxy-nginx
-```
-```
-./update.sh
-```
+
+If any step fails, the rest is skipped; start Docker again with
+`systemctl start containerd docker`. When everything shows `Up`, free the old
+space: `rm -rf /var/lib/docker.old /var/lib/containerd.old`
+
+### Checks
+
+| What | Command |
+|---|---|
+| Everything running | `docker compose ps` (in the stack folder) |
+| Why an update failed | `tail -40 update-failures.log` |
+| Tunnel up (home) | `docker logs frpc 2>&1 \| grep -i "login to server success" \| tail -1` |
+| Blocklist loaded (Linode) | `docker logs blocklist --tail 3` |
+| Blocklist firewall table present (Linode) | `nft list table inet linode_blocklist \| grep -c elements` |
+| Rate limiter (Linode) | `docker logs ratelimit-gen --tail 5` |
+| fail2ban bans (Linode) | `docker exec fail2ban fail2ban-client status nginx-http-auth` |
