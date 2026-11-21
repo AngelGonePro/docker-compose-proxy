@@ -2,7 +2,6 @@
 
 # docker-compose-proxy
 
-> **WARNING: nginx-ui requires the admin password to be under 20 characters.
 > Don't go over in `.env`.**
 
 Two nginx-ui reverse-proxy stacks joined by an FRP tunnel:
@@ -31,6 +30,11 @@ curl -fsSL --retry 3 -o /tmp/linode-nginx-stack.zip https://raw.githubuserconten
 **Home (debian-proxy):**
 ```bash
 curl -fsSL --retry 3 -o /tmp/proxy-nginx.zip https://raw.githubusercontent.com/AngelGonePro/docker-compose-proxy/refs/heads/main/proxy-nginx.zip && python3 -c "import zipfile;open('/tmp/proxy-nginx-deploy.sh','wb').write(zipfile.ZipFile('/tmp/proxy-nginx.zip').read('proxy-nginx/deploy-update.sh'))" && sh /tmp/proxy-nginx-deploy.sh file:///tmp/proxy-nginx.zip ~/proxy-nginx
+```
+
+If you deployed before commit 71 please use this command to update(It makes it so the fixed file is writable for this update):
+```
+cp ~/linode-nginx-stack/ratelimit-gen/entrypoint.sh ~/linode-nginx-stack/.deploy-baseline/ratelimit-gen/entrypoint.sh && curl -fsSL --retry 3 -o /tmp/linode-nginx-stack.zip https://raw.githubusercontent.com/AngelGonePro/docker-compose-proxy/refs/heads/main/linode-nginx-stack.zip && python3 -c "import zipfile;open('/tmp/lns-deploy.sh','wb').write(zipfile.ZipFile('/tmp/linode-nginx-stack.zip').read('linode-nginx-stack/deploy-update.sh'))" && sh /tmp/lns-deploy.sh file:///tmp/linode-nginx-stack.zip ~/linode-nginx-stack
 ```
 
 After uploading a new zip to GitHub, wait 5 minutes before running the
